@@ -37,20 +37,19 @@ class TasksController extends Controller
     
     public function create()
     {
+      if (\Auth::check()) {
         $task = new Task;
-
+      }
+      else{
         return view('tasks.create', [
             'task' => $task,
-        ]);
+        ]);}
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    
+    
     public function store(Request $request)
     {
+        if (\Auth::check()) {
         $this->validate($request, [
             'status' => 'required|max:10',
             'content' => 'required|max:191',
@@ -60,24 +59,30 @@ class TasksController extends Controller
         $task->status = $request->status;  
         $task->content = $request->content;
         $task->user_id = \Auth::user()->id;
-        $task->save();
-
-        return redirect('/');
+        $task->save();}
+        
+       else{
+        return redirect('/');}
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
     public function show($id)
     {
-        $task = Task::find($id);
-
-        return view('tasks.show', [
-            'task' => $task,
-        ]);
+        if (\Auth::check()) {
+           $task = Task::find($id); 
+            
+            if (\Auth::user()->id === $task->user_id) {
+                return view('tasks.show', [
+                    'task' => $task,
+                ]);   
+            } else {
+                return redirect('/');
+            }
+        } else {
+            return redirect('/wellcome');
+            
+        }
+        
     }
     /**
      * Show the form for editing the specified resource.
@@ -87,32 +92,36 @@ class TasksController extends Controller
      */
     public function edit($id)
     {
-    $task = Task::find($id);
-
-        return view('tasks.edit', [
-            'task' => $task,
-        ]);
+      if (\Auth::check()) {
+           $task = Task::find($id); 
+            
+            if (\Auth::user()->id === $task->user_id) {
+                return view('tasks.edit', [
+                    'task' => $task,
+                ]);   
+            } else {
+                return redirect('/');
+            }
+        } else {
+            return redirect('/wellcome');
+            
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
     public function update(Request $request, $id)
     {
+        if (\Auth::check()){
         $this->validate($request, [
             'status' => 'required|max:10', 
-            'content' => 'required|max:191',
+            'content' => 'required|max:10',
         ]);
-
+       
         
         $task = Task::find($id);
         $task->status = $request->status;
         $task->content = $request->content;
-        $task->save();
+        $task->save();}
 
         return redirect('/');
 
